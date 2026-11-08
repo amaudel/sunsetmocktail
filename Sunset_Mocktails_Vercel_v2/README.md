@@ -22,6 +22,8 @@ Frontend estático en HTML, CSS y JavaScript. El archivo `index.html` está en l
 
 El formulario no está conectado a ningún servicio: al pulsar «Enviar mensaje» comunica que el servicio aún no está disponible y no envía ni guarda datos. No hay pagos ni pedidos activos. El proyecto es una propuesta académica; los precios no se han validado como precios comerciales.
 
-La tarjeta de la institución en la sección de contacto usa una foto guardada dentro del proyecto (`assets/campus.webp`), aportada por el autor, y un enlace a Google Maps. La dirección corresponde a la institución educativa: https://encuentroliteratura.laasuncion.edu.ec/contacto/ . Las fuentes tipográficas también se cargan desde internet, con alternativas locales. Al publicar, conviene cambiar `og:image` en `index.html` por la dirección completa (por ejemplo `https://tu-sitio.vercel.app/assets/og-image.jpg`) para que WhatsApp y redes muestren la vista previa.
+La tarjeta de la institución en la sección de contacto usa una foto guardada dentro del proyecto (`assets/campus.webp`), aportada por el autor, y un enlace a Google Maps. La dirección corresponde a la institución educativa: https://encuentroliteratura.laasuncion.edu.ec/contacto/ . Las fuentes tipográficas también se cargan desde internet, con alternativas locales. `og:image` y `og:url` en `index.html` ya usan la dirección completa de `https://sunset-mocktails.vercel.app/` para que WhatsApp y redes muestren la vista previa; si el dominio cambia, hay que actualizarlas.
+
+En «Nuestros mocktails», el botón «Crear mi versión» del detalle de cada bebida abre «Crea tu Sunset» con los ingredientes más parecidos ya seleccionados.
 
 La página se entrega para posterior publicación; el ZIP por sí mismo no la despliega. Los avisos de acceso y privacidad, las pruebas interactivas en navegadores y la configuración del dominio deben verificarse en el entorno de destino.
