@@ -24,6 +24,8 @@ El formulario no está conectado a ningún servicio: al pulsar «Enviar mensaje�
 
 La tarjeta de la institución en la sección de contacto usa una foto guardada dentro del proyecto (`assets/campus.webp`), aportada por el autor, y un enlace a Google Maps. La dirección corresponde a la institución educativa: https://encuentroliteratura.laasuncion.edu.ec/contacto/ . Las fuentes tipográficas también se cargan desde internet, con alternativas locales. `og:image` y `og:url` en `index.html` ya usan la dirección completa de `https://sunset-mocktails.vercel.app/` para que WhatsApp y redes muestren la vista previa; si el dominio cambia, hay que actualizarlas.
 
+Los textos están adaptados a la Feria de Emprendimiento del colegio de forma general. Cuando se conozcan los detalles, basta con reemplazar «Por anunciar» (fecha, horario y stand) en la sección `#feria` de `index.html`; hay un comentario `<!-- FERIA: ... -->` justo encima.
+
 En «Nuestros mocktails», el botón «Crear mi versión» del detalle de cada bebida abre «Crea tu Sunset» con los ingredientes más parecidos ya seleccionados.
 
 La página se entrega para posterior publicación; el ZIP por sí mismo no la despliega. Los avisos de acceso y privacidad, las pruebas interactivas en navegadores y la configuración del dominio deben verificarse en el entorno de destino.
