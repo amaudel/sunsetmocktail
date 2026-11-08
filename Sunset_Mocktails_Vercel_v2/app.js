@@ -78,8 +78,106 @@ function render() {
   const from = $('#mix-from');
   from.hidden = !inspiredBy;
   if (inspiredBy) from.textContent = inspiredBy;
-  $('.liquid').style.background = { Maracuyá: '#f7a943', Mango: '#f59d34', Piña: '#f4d467', Fresa: '#ed7d89' }[state.base];
+  updateDrink(drinkReady);
+  drinkReady = true;
 }
+
+/* ---------- Bebida animada ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const drink = $('.drink');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)';
+const drinkColors = {
+  base: { Maracuyá: '#f9a825', Mango: '#ff8f00', Piña: '#ffd740', Fresa: '#e8335a' },
+  extra: { Coco: '#fff1d6', Jamaica: '#b0174f', Toronja: '#ff7d73', Limón: '#d4e88f' }
+};
+const LEVEL = { '10 oz': 108, '12 oz': 86 }; // altura de la superficie del líquido
+let drinkReady = false;
+
+/* Partes repetitivas del SVG: rayos del sol, olas y burbujas. */
+(function buildDrink() {
+  const cx = 120, cy = 128, R = 124, w = 0.07;
+  const pt = a => `${(cx + R * Math.cos(a)).toFixed(1)} ${(cy + R * Math.sin(a)).toFixed(1)}`;
+  let rays = '';
+  for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; rays += `M${cx} ${cy} L${pt(a - w)} L${pt(a + w)} Z`; }
+  drink.querySelector('.rays path').setAttribute('d', rays);
+
+  const wave = (amp, period) => {
+    let d = `M-120 0 q${period / 4} ${-amp} ${period / 2} 0`;
+    for (let x = -120 + period / 2; x < 380; x += period / 2) d += ` t${period / 2} 0`;
+    return d + ' L380 170 L-120 170 Z';
+  };
+  drink.querySelector('.wave-back').setAttribute('d', wave(4, 70));
+  drink.querySelector('.wave-front').setAttribute('d', wave(5, 60));
+
+  const bubbles = drink.querySelector('.bubbles');
+  [[90, 2.2, 3.1, 0], [104, 1.6, 2.6, .8], [116, 2.8, 3.6, 1.7], [128, 1.8, 2.9, .4],
+   [140, 2.4, 3.3, 2.2], [98, 1.4, 2.4, 1.3], [134, 1.5, 2.7, 2.8], [122, 2, 3.8, .2]].forEach(([x, r, dur, delay]) => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', 232); c.setAttribute('r', r);
+    c.style.animationDuration = dur + 's';
+    c.style.animationDelay = -delay + 's';
+    bubbles.append(c);
+  });
+
+  // Pausa las animaciones continuas cuando la bebida no está en pantalla.
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => drink.classList.toggle('paused', !e.isIntersecting)).observe(drink);
+  }
+})();
+
+function updateDrink(animateChange) {
+  const base = drinkColors.base[state.base], extra = drinkColors.extra[state.extra];
+  drink.querySelector('.liq-top').style.stopColor = extra;
+  drink.querySelectorAll('.liq-base').forEach(s => { s.style.stopColor = base; });
+  drink.querySelector('.sun-stop').style.stopColor = base;
+  const level = LEVEL[state.size];
+  drink.querySelector('.liquid').style.transform = `translate(0px, ${level}px)`;
+
+  drink.querySelectorAll('[data-group]').forEach(el => {
+    const on = state[el.dataset.group] === el.dataset.v;
+    const wasOn = el.classList.contains('on');
+    el.classList.toggle('on', on);
+    if (on && !wasOn && animateChange) garnishIn(el);
+  });
+
+  if (animateChange && !reduceMotion.matches) {
+    drink.querySelector('.drink-body').animate(
+      [{ transform: 'scale(0.96)' }, { transform: 'scale(1)' }],
+      { duration: 380, easing: EASE_OUT }
+    );
+    splash(level, [base, extra]);
+  }
+}
+
+/* El ingrediente nuevo cae sobre el vaso; con movimiento reducido solo aparece. */
+function garnishIn(el) {
+  const frames = reduceMotion.matches
+    ? [{ opacity: 0 }, { opacity: 1 }]
+    : [{ opacity: 0, transform: 'translateY(-14px) rotate(-14deg) scale(0.9)' }, { opacity: 1, transform: 'none' }];
+  el.animate(frames, { duration: 420, easing: EASE_OUT });
+}
+
+/* Gotas que saltan de la superficie del líquido. */
+function splash(y, palette) {
+  const g = drink.querySelector('.splash');
+  for (let i = 0; i < 8; i++) {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', 96 + i * 7 + Math.random() * 4);
+    c.setAttribute('cy', y + 2);
+    c.setAttribute('r', 2 + Math.random() * 2.5);
+    c.setAttribute('fill', palette[i % 2]);
+    g.append(c);
+    const dx = (Math.random() - 0.5) * 56, h = 22 + Math.random() * 32;
+    c.animate([
+      { transform: 'translate(0px, 0px) scale(0.4)', opacity: 0 },
+      { transform: `translate(${dx * 0.6}px, ${-h}px) scale(1)`, opacity: 1, offset: 0.4 },
+      { transform: `translate(${dx}px, ${-h * 0.2}px) scale(0.7)`, opacity: 0 }
+    ], { duration: 650, easing: EASE_OUT }).onfinish = () => c.remove();
+  }
+}
+
+render();
 
 /* Busca, en el texto de ingredientes, la primera opción de cada grupo que aparezca. */
 function firstMatch(list, text) {
@@ -120,7 +218,6 @@ $('#reset').addEventListener('click', () => {
   inspiredBy = null;
   render();
 });
-render();
 
 /* ---------- Menú móvil ---------- */
 const hamburger = $('.hamb'), menu = $('#menu');
